@@ -10,9 +10,9 @@ window.GAMES_DATA = {
       "img": "./assets/home/about/games/game-mwwbnrdnek9r.webp"
     },
     {
-      "title": "游戏 05",
-      "desc": "58级。",
-      "img": "./assets/home/about/games/game-mwwchi0pyt8e.webp"
+      "title": "明日方舟",
+      "desc": "最喜欢的塔防游戏。\n22-24三年全勤玩家，因换手机痛失b服原生号。",
+      "img": "./assets/home/about/games/arknights.png"
     },
     {
       "title": "空洞骑士/丝之歌",
@@ -20,24 +20,24 @@ window.GAMES_DATA = {
       "img": "./assets/home/about/games/game-mwwbu3d33uo1.webp"
     },
     {
-      "title": "明日方舟",
-      "desc": "最喜欢的塔防游戏。\n22-24三年全勤玩家，因换手机痛失b服原生号。",
-      "img": "./assets/home/about/games/arknights.png"
-    },
-    {
       "title": "幻兽帕鲁",
-      "desc": "170h+。帕鲁全收集。",
+      "desc": "140h+。帕鲁全收集。",
       "img": "./assets/home/about/games/game-mwwciivpy19m.webp"
     },
     {
-      "title": "游戏 07",
+      "title": "终末地",
+      "desc": "58级。",
+      "img": "./assets/home/about/games/game-mwwchi0pyt8e.webp"
+    },
+    {
+      "title": "原神",
       "desc": "56级。",
       "img": "./assets/home/about/games/game-mwwclwgym1yf.webp"
     },
     {
-      "title": "游戏 08",
-      "desc": "这里写一句这游戏哪里吸引你，三十字以内、两行刚好。",
-      "img": ""
+      "title": "女神异闻录5",
+      "desc": "交互爽之。50h+",
+      "img": "./assets/home/about/games/game-mwx7lbcm0xrm.webp"
     },
     {
       "title": "无限暖暖",
@@ -45,76 +45,86 @@ window.GAMES_DATA = {
       "img": "./assets/home/about/games/game-mwwcn8dbaywk.webp"
     },
     {
-      "title": "游戏 10",
-      "desc": "这里写一句这游戏哪里吸引你，三十字以内、两行刚好。",
-      "img": ""
+      "title": "夜幕之下",
+      "desc": "52级。纯粹的xp",
+      "img": "./assets/home/about/games/game-mwx81yxh49dk.webp"
     },
     {
-      "title": "游戏 11",
-      "desc": "这里写一句这游戏哪里吸引你，三十字以内、两行刚好。",
-      "img": ""
+      "title": "桃源深处有人家",
+      "desc": "很长一段时间的解压休闲小游戏。\n35级。",
+      "img": "./assets/home/about/games/game-mwx8352dsxa9.webp"
+    },
+    {
+      "title": "饥荒",
+      "desc": "30h+",
+      "img": "./assets/home/about/games/game-mwx7dc0w1zmf.webp"
+    },
+    {
+      "title": "星露谷",
+      "desc": "30h+",
+      "img": "./assets/home/about/games/game-mwx7iedkjhci.webp"
     }
   ],
   "lib": [
     {
-      "title": "游戏 01",
-      "desc": "",
-      "img": ""
+      "title": "潜水员戴夫",
+      "desc": "玩的手游版。休闲好玩。",
+      "img": "./assets/home/about/games/game-mwx7nepi64mh.webp"
     },
     {
-      "title": "游戏 02",
+      "title": "双人成行",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx7otgcikr8.webp"
     },
     {
-      "title": "游戏 03",
+      "title": "只只大冒险",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx7rrcxjz3w.webp"
     },
     {
-      "title": "游戏 04",
+      "title": "泡姆泡姆",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx7rv6h9v6q.webp"
     },
     {
-      "title": "游戏 05",
+      "title": "逃离鸭科夫",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx7sk1qfzw2.webp"
     },
     {
-      "title": "游戏 06",
+      "title": "Toem",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx7wi317odk.webp"
     },
     {
-      "title": "游戏 07",
+      "title": "纸房子",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx88xqotz0a.webp"
     },
     {
-      "title": "游戏 08",
+      "title": "REPO",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx86mwf4kjj.webp"
     },
     {
-      "title": "游戏 09",
+      "title": "赛博朋克2077",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx84qdozlpe.webp"
     },
     {
-      "title": "游戏 10",
+      "title": "荒野大镖客2",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx856f1rxx0.webp"
     },
     {
-      "title": "游戏 11",
+      "title": "苍翼：混沌效应",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx8boda22al.webp"
     },
     {
-      "title": "游戏 12",
+      "title": "迷雾侦探",
       "desc": "",
-      "img": ""
+      "img": "./assets/home/about/games/game-mwx8cldofkyp.webp"
     }
   ]
 };
