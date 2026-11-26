@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bae's ROOM · 个人主页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@200;300;400;500;600&display=swap">
+  <link rel="preload" href="./assets/home/sky.webp" as="image">
+  <link rel="stylesheet" href="./src/css/loading.css?v=bgpx-3">
+  <link rel="stylesheet" href="./src/css/site.css?v=am-edit-3">
+</head>
+<body>
+  <main class="stage" id="stage">
+    <!-- 0 空白 → 红色先擦过 → 天蓝背景板盖上 -->
+    <div class="wipe wipe--red"></div>
+    <div class="wipe wipe--sky"></div>
+
+    <!-- 背景元素：白色色块、半调网点、能量点列、白色墨点、星星和碎片，由 JS 生成 -->
+    <svg class="bg" id="bg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <filter id="rough" x="-10%" y="-30%" width="120%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="3" seed="4"/>
+          <feDisplacementMap in="SourceGraphic" scale="9"/>
+        </filter>
+        <filter id="splashS" x="-80%" y="-80%" width="260%" height="260%">
+          <feTurbulence type="fractalNoise" baseFrequency=".35" numOctaves="2" seed="2"/>
+          <feDisplacementMap in="SourceGraphic" scale="3"/>
+        </filter>
+        <filter id="splashL" x="-60%" y="-60%" width="220%" height="220%">
+          <feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="3" seed="8"/>
+          <feDisplacementMap in="SourceGraphic" scale="9"/>
+        </filter>
+        <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="2.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <pattern id="ht" width="13" height="13" patternUnits="userSpaceOnUse" patternTransform="rotate(-28)">
+          <circle cx="6.5" cy="6.5" r="2.4" fill="#fff"/>
+        </pattern>
+        <linearGradient id="htGrad">
+          <stop offset="0" stop-color="#fff"/>
+          <stop offset="1" stop-color="#000"/>
+        </linearGradient>
+        <mask id="htFade" maskContentUnits="objectBoundingBox">
+          <rect width="1" height="1" fill="url(#htGrad)"/>
+        </mask>
+      </defs>
+    </svg>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- 临界阶段才出现的交叉警示条（参考《记忆管理局》的告警画面） -->
+    <div class="hazard" aria-hidden="true"><i></i><i></i></div>
+
+    <!-- 红色即将爆炸物 -->
+    <div class="bomb" id="bomb" aria-hidden="true">
+      <div class="bomb__shake">
+        <div class="bomb__squash">
+          <svg viewBox="-100 -100 200 200">
+            <defs>
+              <filter id="boil" x="-40%" y="-40%" width="180%" height="180%">
+                <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="1"/>
+                <feDisplacementMap id="boilMap" in="SourceGraphic" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+              <filter id="haloBlur" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="9"/>
+              </filter>
+              <radialGradient id="bombFill" cx="38%" cy="36%" r="72%">
+                <stop offset="0" stop-color="#FF6A8E"/>
+                <stop offset=".5" stop-color="#FF0A3C"/>
+                <stop offset="1" stop-color="#D60032"/>
+              </radialGradient>
+              <pattern id="bombDots" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+                <circle cx="3.5" cy="3.5" r="1.5" fill="#fff"/>
+              </pattern>
+              <linearGradient id="dotFade" x1="0" y1="0" x2="1" y2="1">
+                <stop offset=".45" stop-color="#000"/>
+                <stop offset="1" stop-color="#fff"/>
+              </linearGradient>
+              <mask id="dotMask"><circle r="62" fill="url(#dotFade)"/></mask>
+            </defs>
+            <circle class="bomb__halo" r="74" fill="#FF0A3C" opacity=".5" filter="url(#haloBlur)"/>
+            <g class="bomb__ring">
+              <circle r="84" fill="none" stroke="#fff" stroke-width="2.2" stroke-dasharray="18 10 4 10"/>
+            </g>
+            <g filter="url(#boil)">
+              <circle r="58" fill="url(#bombFill)"/>
+              <circle cx="-18" cy="16" r="34" fill="#FF4B86" opacity=".55"/>
+              <circle cx="22" cy="-6" r="22" fill="#FF0A3C" opacity=".7"/>
+              <circle r="58" fill="url(#bombDots)" mask="url(#dotMask)" opacity=".6"/>
+              <circle cx="68" cy="-30" r="5" fill="#FF0A3C"/>
+              <circle cx="-62" cy="46" r="4" fill="#FF4B86"/>
+              <circle cx="54" cy="54" r="3" fill="#FF0A3C"/>
+              <circle cx="-50" cy="-58" r="3" fill="#FF4B86"/>
+              <circle id="bombFlash" r="60" fill="#fff" opacity="0"/>
+            </g>
+            <ellipse cx="-22" cy="-27" rx="14" ry="7" transform="rotate(-35 -22 -27)" fill="#fff" opacity=".85"/>
+            <path class="bomb__spark" transform="translate(28 -36) scale(10)" fill="#fff"
+              d="M0-1C.1-.15.15-.1 1 0 .15.1.1.15 0 1-.1.15-.15.1-1 0-.15-.1-.1-.15 0-1Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- HUD：锁定框、测量线、数值标签（参考《记忆管理局》剧中 UI） -->
+    <div class="hud" aria-hidden="true">
+      <div class="hud__line"></div>
+      <div class="hud__lock"><i></i><i></i><i></i><i></i></div>
+      <div class="hud__tag hud__tag--pressure"><b>PRESSURE</b><span data-pressure>000</span></div>
+      <div class="hud__tag hud__tag--state"><span data-state>STABLE</span></div>
+    </div>
+
+    <!-- 内页（作品集、简历）后面的天空：Figma「Frame 8」（447:1348）导出的渐变天空，自带噪点 -->
+    <div class="hero" aria-hidden="true">
+      <div class="home-bg"></div>
+    </div>
+
+
+    <div class="burst" id="burst" aria-hidden="true"></div>
+    <svg class="starburst" viewBox="-600 -600 1200 1200" aria-hidden="true"><g id="spikes"></g></svg>
+    <div class="flash" aria-hidden="true"></div>
+
+
+    <div class="label" aria-label="加载进度">
+      <span class="label__pct"><b data-pct>000</b>%</span>
+      <span class="label__row"><span>LOADING</span><span class="label__bar" data-bar>□□□□□□□□□□</span></span>
+    </div>
+
+    <!-- 开场掠过转场：前方白色，一条宽红带斜着扫过整屏，扫过的地方露出场景 -->
+    <!-- 网站本体：loading 结束后出现（src/js/site.js，文字内容在 src/js/content.js） -->
+    <div class="site" id="site" hidden>
+      <header class="nav">
+        <a class="nav__brand" href="#/home" data-cursor="HOME"><span class="dot-red"></span><span data-scramble>BAE'S ROOM</span></a>
+      </header>
+
+      <section class="page page--home" data-page="home" aria-label="首页">
+        <!-- 主页是一张长滚动页（按 Figma「Frame 12」）：首屏 → 1 个人信息。
+             所有元素按 1920 宽设计稿坐标排版：--u = 1/1920 屏宽，style 里的 --x/--y/--w 就是设计稿像素 -->
+        <div class="hs-scroll" data-home-scroll>
+          <section class="hs hs--hero" data-hero>
+            <img class="hs__bg" src="./assets/home/bg-hero.webp" alt="">
+            <!-- 首屏像素滤镜：每 n 像素取一个样点，膨胀成方块（屏幕像素）。
+                 solid：整格（钢球、星星、土星环）；ht：网点，方块之间留缝、按透明度随机缺格，星芒柔和的尖端会变成稀疏的点 -->
+            <svg class="px-defs" width="0" height="0" aria-hidden="true"><defs>
+              <filter id="hpx3" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="0" y="0" width="2" height="2"/><feComposite width="3" height="3"/><feTile result="g"/>
+                <feComposite in="SourceGraphic" in2="g" operator="in"/><feMorphology operator="dilate" radius="1"/>
+              </filter>
+              <filter id="hpx4" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="1" y="1" width="2" height="2"/><feComposite width="4" height="4"/><feTile result="g"/>
+                <feComposite in="SourceGraphic" in2="g" operator="in"/><feMorphology operator="dilate" radius="2"/>
+              </filter>
+              <filter id="hpx6" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="2" y="2" width="2" height="2"/><feComposite width="6" height="6"/><feTile result="g"/>
+                <feComposite in="SourceGraphic" in2="g" operator="in"/><feMorphology operator="dilate" radius="3"/>
+              </filter>
+              <filter id="hpx10" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="4" y="4" width="2" height="2"/><feComposite width="10" height="10"/><feTile result="g"/>
+                <feComposite in="SourceGraphic" in2="g" operator="in"/><feMorphology operator="dilate" radius="5"/>
+              </filter>
+              <filter id="hpx-ht" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="3" y="3" width="1" height="1"/><feComposite width="7" height="7"/><feTile result="g"/>
+                <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="1" seed="5" result="noise"/>
+                <feComposite in="SourceAlpha" in2="noise" operator="arithmetic" k2="3" k3="-4.8" k4="1.2"/>
+                <feComponentTransfer result="keep"><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer>
+                <feComposite in="g" in2="keep" operator="in" result="dots"/>
+                <feComposite in="SourceGraphic" in2="dots" operator="in"/>
+                <feMorphology operator="dilate" radius="2"/>
+              </filter>
+            </defs></svg>
+            <div class="hero-orb" data-orb>
+              <img class="fx hero-orb__glow" style="--x:108;--y:11.1;--w:1059" src="./assets/home/glow.webp" alt="">
+              <!-- 像素层：滤镜加在不转动的外层上，网格始终和屏幕对齐 -->
+              <div class="px-layer px-layer--ht"><img class="fx hero-orb__spikes" style="--x:-15.1;--y:-132;--w:1233.1" src="./assets/home/spikes.webp" alt=""></div>
+              <!-- 红球 ASCII 像素风（orb-pixels.js + orb-data.js）：柔光保留，球体画成一格一格的字符，球外圆点画成像素方块 -->
+              <canvas class="fx hero-orb__bomb" style="--x:197;--y:129;--w:925.4;--h:945.4" data-orb-pixels aria-hidden="true"></canvas>
+              <i class="orb-shine" aria-hidden="true"></i>
+              <canvas class="hero-confetti" data-confetti aria-hidden="true"></canvas>
+              <!-- 两圈土星环（Figma Ellipse 47 / 48），压在球的最上层；放在 .hero-orb 里，跟着球一起缩放，相对位置不变 -->
+              <div class="px-layer px-layer--3">
+                <img class="fx hero-orb__saturn" style="--x:253.3;--y:361.3;--w:706.1" src="./assets/home/sat1.webp" alt="">
+                <img class="fx hero-orb__saturn" style="--x:257.1;--y:419.5;--w:713" src="./assets/home/sat2.webp" alt="">
+              </div>
+            </div>
+            <button type="button" class="orb-hit" data-orb-hit data-cursor="POKE" aria-label="戳一下红球"></button>
+            <div class="figma-stars" aria-hidden="true" data-depth=".15"><i style="--sx:36;--sy:72.1016;--sw:106;background-image:url(./assets/home/star-a.svg)"></i><i style="--sx:36;--sy:208.7129;--sw:106;background-image:url(./assets/home/star-b.svg)"></i><i style="--sx:37;--sy:345.3242;--sw:105;background-image:url(./assets/home/star-c.svg)"></i><i style="--sx:37;--sy:482;--sw:106;background-image:url(./assets/home/star-d.svg)"></i><i style="--sx:37;--sy:618.6113;--sw:106;background-image:url(./assets/home/star-e.svg)"></i><i style="--sx:38;--sy:755.2227;--sw:105;background-image:url(./assets/home/star-f.svg)"></i><i style="--sx:160;--sy:209;--sw:106;background-image:url(./assets/home/star-a.svg)"></i><i style="--sx:160;--sy:345.6113;--sw:106;background-image:url(./assets/home/star-b.svg)"></i><i style="--sx:161;--sy:482.2227;--sw:105;background-image:url(./assets/home/star-c.svg)"></i></div>
+            <div class="px-layer px-layer--6">
+              <img class="fx spin" data-depth=".45" style="--x:22;--y:362;--w:129" src="./assets/home/thinstar.webp" alt="" aria-hidden="true">
+              <img class="fx spin" data-depth=".6" style="--x:167;--y:515;--w:87;animation-duration:9s;animation-direction:reverse" src="./assets/home/thinstar.webp" alt="" aria-hidden="true">
+              <img class="fx roll" data-depth=".9" data-sheen style="--x:560;--y:198;--w:55;--roll:5s" src="./assets/home/ball1.webp" alt="" aria-hidden="true">
+              <img class="fx roll" data-depth="1.2" data-sheen style="--x:312.1;--y:862.1;--w:46.6;--roll:4.2s;animation-direction:reverse" src="./assets/home/ball2.webp" alt="" aria-hidden="true">
+              <img class="fx roll" data-depth=".75" data-sheen style="--x:1079.8;--y:833.1;--w:41.9;--roll:3.6s" src="./assets/home/ball3.webp" alt="" aria-hidden="true">
+              <img class="fx hero-planet" data-depth=".6" data-sheen style="--x:1214;--y:201;--w:194.1" src="./assets/home/planet.webp" alt="" aria-hidden="true">
+            </div>
+            <h1 class="fx hero-title" style="--x:1100.8;--y:228.8;--w:756.3" data-hero-title><img src="./assets/home/title.webp" alt="Bae's Portfolio"></h1>
+            <i class="hero-line" style="--y:238;--h:226"></i>
+            <i class="hero-line" style="--y:511;--h:174"></i>
+            <i class="hero-line" style="--y:759;--h:30"></i>
+            <i class="hero-line" style="--y:814;--h:30"></i>
+            <i class="hero-line" style="--y:868;--h:30"></i>
+            <img class="fx hero-info" data-depth=".2" style="--x:1566;--y:528;--w:297" src="./assets/home/info.webp" alt="求职方向：游戏策划 | 交互设计；求职者：郑婷婷">
+            <div class="hero-social">
+              <!-- 点哪个图标就在左边出现哪个面板（坐标、尺寸照设计稿）；再点一次或点别处收起 -->
+              <div class="fx sc" style="--x:1819;--y:755;--w:41">
+                <button type="button" data-sc data-cursor="WECHAT" aria-label="微信二维码" aria-expanded="false"><img src="./assets/home/wechat.webp" alt=""></button>
+                <div class="sc-pop sc-pop--qr" style="--px:1231;--py:464;--pw:499;--ph:514;--pr:0">
+                  <img src="./assets/home/wechat-qr.webp?v=2" alt="Bae 的微信二维码，微信扫一扫添加好友">
+                </div>
+              </div>
+              <div class="fx sc" style="--x:1828;--y:817;--w:24">
+                <button type="button" data-sc data-cursor="GITHUB" aria-label="GitHub" aria-expanded="false"><img src="./assets/home/github.webp" alt=""></button>
+                <div class="sc-pop sc-pop--center"><a href="#" data-github target="_blank" rel="noopener" data-cursor="OPEN">GitHub</a></div>
+              </div>
+              <div class="fx sc" style="--x:1828;--y:874;--w:27">
+                <button type="button" data-sc data-cursor="MAIL" aria-label="邮箱" aria-expanded="false"><img src="./assets/home/mail.webp" alt=""></button>
+                <div class="sc-pop" data-mail-list></div>
+              </div>
+            </div>
+            <button type="button" class="hero-down" data-scroll-next data-cursor="SCROLL" aria-label="向下查看个人简介"><svg viewBox="0 0 100 70" fill="none" aria-hidden="true"><path d="M15 12L50 40L85 12M15 32L50 60L85 32"/></svg></button>
+            <button type="button" class="scroll-hint" data-scroll-next data-cursor="SCROLL"><img src="./assets/home/hint.webp" alt="滑动以查看更多内容……"></button>
+          </section>
+
+          <!-- 1 个人信息：区块从设计稿 y=1239 开始，下面的坐标都减掉了 1239 -->
+          <section class="hs hs--info" data-info>
+            <img class="hs__bg" src="./assets/home/bg-info.webp" alt="">
+            <img class="fx twinkle" style="--x:19;--y:297;--w:106" src="./assets/home/star.webp" alt="" aria-hidden="true">
+            <img class="fx twinkle" style="--x:19;--y:424;--w:106;animation-delay:-1.1s" src="./assets/home/star.webp" alt="" aria-hidden="true">
+            <img class="fx twinkle" style="--x:19;--y:552;--w:106;animation-delay:-2.2s" src="./assets/home/star.webp" alt="" aria-hidden="true">
+            <h2 class="fx info-header" style="--x:906;--y:309;--w:978" data-info-header><img src="./assets/home/header.webp?v=2" alt="1 个人信息 Information"><span class="ip-px" data-header-px></span></h2>
+            <img class="fx" style="--x:1314;--y:1076.9;--w:539.1" src="./assets/home/glow2.webp" alt="" aria-hidden="true">
+            <i class="info-line106" aria-hidden="true"></i>
+            <!-- 提示语（Figma 572:3，设计稿 1474, 2062）：滑到这里时像有人在打字一样逐字出现，打完光标闪烁 -->
+            <p class="fx info-hint" style="--x:1474;--y:823" data-info-hint aria-label="点击任意模块查看信息"><span data-type aria-hidden="true"></span><i class="info-hint__caret" aria-hidden="true"></i></p>
+            <canvas class="rain" data-rain aria-hidden="true"></canvas>
+
+            <!-- 四个标签（设计稿里的模糊大字）：点标签或旁边的飞鸟都能打开对应的信息框 -->
+            <div class="info-tabs" aria-label="个人信息分页">
+              <button type="button" class="info-tab" data-tab="basic" data-cursor="BASIC INFO" aria-pressed="false">
+                <img class="fx" style="--x:167.4;--y:1149.5;--w:203.9" src="./assets/home/lblBasic.webp" alt="Basic">
+                <img class="fx" style="--x:164.5;--y:1197.5;--w:504.5" src="./assets/home/lblInfo.webp" alt="Information">
+              </button>
+              <button type="button" class="info-tab" data-tab="edu" data-cursor="EDUCATION" aria-pressed="false">
+                <img class="fx" style="--x:463.1;--y:1494.5;--w:400.9" src="./assets/home/lblEdu.webp" alt="Education">
+              </button>
+              <button type="button" class="info-tab" data-tab="skills" data-cursor="SKILLS" aria-pressed="false">
+                <img class="fx" style="--x:963.1;--y:1314;--w:275.9" src="./assets/home/lblSkills.webp" alt="SKILLS">
+              </button>
+              <button type="button" class="info-tab" data-tab="exp" data-cursor="EXPERIENCES" aria-pressed="false">
+                <img class="fx" style="--x:1308.3;--y:1503.5;--w:489.8" src="./assets/home/lblExp.webp" alt="Experiences">
+              </button>
+            </div>
+
+            <!-- 飞鸟：常驻扇翅，点哪只就打开哪一页 -->
+            <button type="button" class="bird" style="--x:169;--y:936;--w:200" data-bird="basic" data-cursor="BASIC INFO" aria-label="个人信息"></button>
+            <button type="button" class="bird" style="--x:564;--y:1278;--w:200;animation-delay:-.3s" data-bird="edu" data-cursor="EDUCATION" aria-label="教育经历"></button>
+            <button type="button" class="bird" style="--x:960;--y:1004;--w:285;animation-delay:-.55s" data-bird="skills" data-cursor="SKILLS" aria-label="专业技能"></button>
+            <button type="button" class="bird" style="--x:1422;--y:1215;--w:263;animation-delay:-.15s" data-bird="exp" data-cursor="EXPERIENCES" aria-label="飞往个人经历"></button>
+
+            <!-- 信息框：每页按设计稿各自的位置摆放（深色毛玻璃 + 渐变描边 + 四角装饰 + 连接线 + 横线）。
+                 默认都隐藏；内容由 site.js 按 content.js 填进 [data-pane] -->
+            <!-- 每页：横线 + 连接线（从红色英文标签旁的像素方块出发，连到卡片）+ 卡片 + 外框装饰。
+                 像素格子（.ip-px 里的 <i>）由 site.js 按设计稿坐标生成，每一颗各自不规则闪烁 -->
+            <div class="ip" data-ip="basic" hidden>
+              <img class="fx ip-lines" style="--x:-1;--y:927;--w:740" src="./assets/home/i_lines.webp" alt="">
+              <svg class="ip-link" viewBox="0 0 1920 2478" preserveAspectRatio="none"><polyline pathLength="1" points="400,977 528,849 893,848"/></svg>
+              <div class="fx ip-box" style="--x:893;--y:812;--w:879;--h:601"><div class="info-pane" data-pane="basic"></div></div>
+              <img class="fx ip-frame" style="--x:869;--y:724;--w:923" src="./assets/home/i_frame.webp" alt="">
+              <img class="fx ip-deco" style="--x:1635;--y:724;--w:210.8" src="./assets/home/pin.webp" alt="">
+              <div class="ip-px"></div>
+            </div>
+            <div class="ip" data-ip="edu" hidden>
+              <img class="fx ip-lines" style="--x:0;--y:1247;--w:1124" src="./assets/home/e_lines.webp" alt="">
+              <svg class="ip-link" viewBox="0 0 1920 2478" preserveAspectRatio="none"><polyline pathLength="1" points="781,1447 897,1597 1307,1596 1307,1402"/></svg>
+              <div class="fx ip-box ip-box--rev" style="--x:867;--y:928;--w:879;--h:479"><div class="info-pane" data-pane="edu"></div></div>
+              <img class="fx ip-frame" style="--x:843;--y:901;--w:923;height:calc(536 * var(--u))" src="./assets/home/e_frame.webp" alt="">
+              <img class="fx ip-deco" style="--x:1508;--y:814;--w:374" src="./assets/home/edustar2.webp" alt="">
+              <div class="ip-px"></div>
+            </div>
+            <div class="ip" data-ip="skills" hidden>
+              <img class="fx ip-lines" style="--x:0;--y:980;--w:1224" src="./assets/home/s_lines.webp" alt="">
+              <svg class="ip-link" viewBox="0 0 1920 2478" preserveAspectRatio="none"><polyline pathLength="1" points="956,1029 664,1029 500,1170"/></svg>
+              <div class="fx ip-box" style="--x:92;--y:1164;--w:879;--h:381"><div class="info-pane" data-pane="skills"></div></div>
+              <img class="fx ip-frame" style="--x:68;--y:1139;--w:923" src="./assets/home/s_frame.webp" alt="">
+              <img class="fx ip-deco" style="--x:756;--y:1119;--w:276" src="./assets/home/s_pin.webp" alt="">
+              <div class="ip-px"></div>
+            </div>
+          </section>
+
+          <!-- 2 个人经历（Figma 设计稿 y = 3717 起，下面的坐标都减掉了 3717；标题从上一屏伸进来，所以 y 是负数） -->
+          <section class="hs hs--exp" data-exp aria-label="个人经历">
+            <img class="hs__bg" src="./assets/home/bg-exp.webp?v=4" alt="">
+            <h2 class="fx info-header exp-header" style="--x:145;--y:-237;--w:944" data-exp-header><img src="./assets/home/header2.webp?v=2" alt="2 个人经历 Experience"><span class="ip-px" data-header-px style="left:calc(-34 * var(--u))"></span></h2>
+            <img class="fx" style="--x:1612;--y:-161;--w:309" src="./assets/home/exp-sparks.webp" alt="" aria-hidden="true">
+            <!-- 左栏：像素图标（代码画，exp-icons.js）+ 标签 / like! / 虚线（图片）。左栏跟背景正常滚动，右侧卡片滚得快一点，滑到底时两边底边对齐 -->
+            <div class="xp-leftcol" data-xp-left>
+              <canvas class="fx xp-icons" style="--x:40;--y:213;--w:680;--h:1870" data-xp-icons aria-hidden="true"></canvas>
+              <img class="fx xp-left" style="--x:120;--y:291;--w:622" src="./assets/home/exp-left-labels.webp" alt="方向：游戏策划、游戏开发、交互设计 UI&amp;UX设计、小工具开发" data-xp-reveal>
+            </div>
+            <div class="fx xp-block" style="--x:726;--y:416;--w:1043" data-xp-work></div>
+            <div class="fx xp-block" style="--x:724;--y:1077;--w:1045" data-xp-projects></div>
+          </section>
+          <!-- 3 作品集（Figma Frame 12 最后一屏）：区块从设计稿 y=6853 开始，下面的坐标都减掉了 6853（标题、电脑、窗口按 Figma 新版整体上移过）。
+               背景、标题、电脑、窗口外框是图片；分类按钮、四张作品卡片、日期标签、连线是代码做的（内容在 content.js 的 showcase） -->
+          <section class="hs hs--works" data-home-works aria-label="作品集">
+            <img class="hs__bg" src="./assets/home/bg-works.webp?v=3" alt="">
+            <!-- 标题左边的星星环：Figma「星星环」18 颗同形四角星，改成 SVG（坐标原点放在环心），整圈原地慢慢转，每颗星各自不规则闪（site.js） -->
+            <svg class="fx wk-ring" style="--x:579;--y:-572;--w:607.67;--h:597.46" viewBox="-302.68 -298.70 607.67 597.46" aria-hidden="true" data-wk-ring>
+              <defs><path id="wk-star" d="M42.96 0L43.43 4.95 43.95 9.89 44.46 14.84 45.11 19.73 45.88 24.62 46.83 29.45 48.12 34.13 49.92 38.58 52.37 42.44 55.42 45.54 58.94 47.82 62.64 49.45 66.46 50.65 70.33 51.63 74.19 52.44 78.1 53.09 82.01 53.74 85.92 54.34 82.01 54.94 78.1 55.59 74.19 56.24 70.33 57.06 66.46 58.04 62.64 59.23 58.94 60.86 55.42 63.15 52.37 66.24 49.92 70.1 48.12 74.56 46.83 79.23 45.88 84.07 45.11 88.96 44.46 93.85 43.95 98.79 43.43 103.74 42.96 108.68 42.49 103.74 41.97 98.79 41.46 93.85 40.81 88.96 40.04 84.07 39.09 79.23 37.81 74.56 36 70.1 33.55 66.24 30.5 63.15 26.98 60.86 23.28 59.23 19.46 58.04 15.59 57.06 11.73 56.24 7.82 55.59 3.91 54.94 0 54.34 3.91 53.74 7.82 53.09 11.73 52.44 15.59 51.63 19.46 50.65 23.28 49.45 26.98 47.82 30.5 45.54 33.55 42.44 36 38.58 37.81 34.13 39.09 29.45 40.04 24.62 40.81 19.73 41.46 14.84 41.97 9.89 42.49 4.95Z"/></defs>
+              <g>
+                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="48s" repeatCount="indefinite" data-wk-spin/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(1 0 0 1 -42.96 -298.70)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.9397 -0.342 0.342 0.9397 -142.66 -266.07)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.61" data-o="0.61" transform="matrix(0.766 -0.6428 0.6428 0.766 -225.34 -201.32)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.5 -0.866 0.866 0.5 -280.46 -112.43)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.51" data-o="0.51" transform="matrix(0.1736 -0.9848 0.9848 0.1736 -302.34 -9.82)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(-0.1736 -0.9848 0.9848 -0.1736 -287.75 94.17)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(-0.5 -0.866 0.866 -0.5 -237.50 186.71)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.33" data-o="0.33" transform="matrix(-0.766 -0.6428 0.6428 -0.766 -159.68 256.43)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(-0.9397 -0.342 0.342 -0.9397 -61.60 295.66)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(-1 0 0 -1 42.96 298.76)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.34" data-o="0.34" transform="matrix(-0.9397 -0.342 -0.342 0.9397 144.98 -266.07)"/>
+                <use href="#wk-star" class="wk-star" fill="#000" fill-opacity="0.37" data-o="0.37" transform="matrix(-0.766 -0.6428 -0.6428 0.766 227.66 -201.32)"/>
+                <use href="#wk-star" class="wk-star" fill="#615454" fill-opacity="0.23" data-o="0.23" transform="matrix(-0.5 -0.866 -0.866 0.5 282.78 -112.43)"/>
+                <use href="#wk-star" class="wk-star" fill="#c9c9c9" fill-opacity="0.23" data-o="0.23" transform="matrix(-0.1736 -0.9848 -0.9848 0.1736 304.66 -9.82)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.1736 -0.9848 -0.9848 -0.1736 290.07 94.16)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.5 -0.866 -0.866 -0.5 239.82 186.71)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.766 -0.6428 -0.6428 -0.766 162.00 256.42)"/>
+                <use href="#wk-star" class="wk-star" fill="#fff" fill-opacity="0.23" data-o="0.23" transform="matrix(0.9397 -0.342 -0.342 -0.9397 63.92 295.66)"/>
+              </g>
+            </svg>
+            <h2 class="fx works-header" style="--x:579;--y:-572;--w:1213" data-works-header><img src="./assets/home/header3.webp?v=2" alt="3 作品集 Information"><span class="ip-px" data-header-px></span></h2>
+            <!-- 窗口：外框图片 + 四张卡片 + 连线（压在卡片上面）+ 日期标签 -->
+            <div class="wk-win" data-wk-in="pop">
+              <img class="fx" style="--x:504;--y:90;--w:1292" src="./assets/home/works-window.webp" alt="" aria-hidden="true">
+              <div class="wk-cards" data-wk-cards></div>
+              <svg class="wk-lines" viewBox="0 90 1920 928" preserveAspectRatio="none" aria-hidden="true" data-wk-lines>
+                <line class="wk-line wk-line--grey" pathLength="1" x1="1222.5" y1="417.5" x2="1118.5" y2="931.5"/>
+                <line class="wk-line wk-line--grey" pathLength="1" x1="857" y1="631" x2="1691.5" y2="929.5"/>
+                <line class="wk-line" pathLength="1" x1="1103" y1="403" x2="857" y2="628"/>
+                <line class="wk-line" pathLength="1" x1="1103" y1="403" x2="1433" y2="628"/>
+              </svg>
+              <svg class="wk-lines wk-lines--dots" viewBox="0 90 1920 928" preserveAspectRatio="none" aria-hidden="true">
+                <circle class="wk-dot" cx="857" cy="628" r="7"/><circle class="wk-dot" cx="1103" cy="403" r="7"/><circle class="wk-dot" cx="1433" cy="628" r="7"/>
+                <circle class="wk-dot wk-dot--grey" cx="1118.5" cy="931.5" r="5.5"/>
+                <rect class="wk-dot wk-dot--grey" x="1218" y="413" width="9" height="9"/><rect class="wk-dot wk-dot--grey" x="1687" y="925" width="9" height="9"/>
+              </svg>
+              <img class="fx wk-note" style="--x:608;--y:213;--w:73" src="./assets/home/works-note.webp" alt="" aria-hidden="true">
+              <img class="fx wk-flag" style="--x:1698;--y:259;--w:38" src="./assets/home/works-flag.webp" alt="" aria-hidden="true">
+              <img class="fx wk-curtain" style="--x:1549;--y:142;--w:250;--h:551" src="./assets/home/works-curtain.svg" alt="" aria-hidden="true" loading="lazy">
+            </div>
+            <!-- 复古电脑：压在窗口左边上面，屏幕里是三个分类按钮 -->
+            <div class="wk-pc" data-wk-in="left">
+              <img class="fx" style="--x:82;--y:317;--w:640" src="./assets/home/works-computer.webp" alt="" aria-hidden="true">
+              <i class="fx wk-scan" style="--x:219;--y:353;--w:346;--h:261" aria-hidden="true"></i>
+              <div class="wk-menu" role="tablist" aria-label="作品分类" data-wk-menu></div>
+            </div>
+          </section>
+          <!-- 4 关于我：标题与「3 作品集」同款（金属序号 + 红色横幅 + 像素字）。
+               header4.webp 由 header3.webp 合成：序号换成 assets/金属数字/4.png，文字换成「关于我」（IPix 像素字体） -->
+          <section class="hs hs--about" data-about aria-label="关于我">
+            <img class="hs__bg" src="./assets/home/about/am-bg.webp" alt="">
+            <h2 class="fx works-header am-header" style="--x:579;--y:-572;--w:1213"><img src="./assets/home/header4.webp" alt="4 关于我 About Me"><span class="ip-px" data-header-px></span></h2>
+            <!-- 游玩经历窗口：标题栏（右上角 × 是编辑模式入口）+ 平台按钮（只切换选中，不筛选）+ 左侧游戏偏好（纯展示）+ 右侧「时长较长 / 游戏库」两个 tab 的卡片。
+                 卡片在框内向下滚动；卡片内容在 src/js/games-data.js，偏好在 content.js 的 games -->
+            <div class="fx am-games" style="--x:210;--y:170;--w:1500" data-am-games>
+              <div class="am-games__bar"><i class="am-games__icon" aria-hidden="true"></i><b>游玩经历</b><span class="am-games__tag" aria-hidden="true">PLAY LOG · 04</span><button type="button" class="am-games__close" aria-label="进入编辑模式" aria-pressed="false" data-cursor="EDIT"></button></div>
+              <div class="am-games__menu"><div class="am-plats" role="group" aria-label="游戏平台" data-am-plats></div></div>
+              <div class="am-editbar" data-am-edit hidden><b>编辑模式</b><span data-am-state aria-live="polite">已保存</span><button type="button" data-am-save data-cursor="SAVE">保存到项目</button><button type="button" data-am-exit data-cursor="EXIT">退出编辑</button></div>
+              <div class="am-games__body">
+                <aside class="am-pref" aria-label="游戏偏好">
+                  <b class="am-pref__title">游戏偏好</b>
+                  <ul class="am-pref__list" data-am-pref-list></ul>
+                </aside>
+                <div class="am-main">
+                  <div class="am-tabs" role="tablist" aria-label="游戏内容分类" data-am-tabs>
+                    <button type="button" role="tab" aria-selected="true" class="is-active" data-am-tab="long" data-cursor="TAB">时长较长</button>
+                    <button type="button" role="tab" aria-selected="false" data-am-tab="lib" data-cursor="TAB">游戏库</button>
+                  </div>
+                  <div class="am-cards" data-am-cards></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- 金属气球（Figma「气球」组，坐标是设计稿像素）：跟着页面滚动；先停在「1 个人信息」标题上方，滚到那里时放飞，升出屏幕后就不再出现，刷新或重新进入首页才会再来一次。
+               不放进 section 里（section 会裁掉超出的部分）；--back 在火箭后面，--front 在火箭前面 -->
+          <!-- 云层：交界处一远一近两层云，滚动时远云慢、近云快，像镜头穿过云层往下（site.js 生成云朵、按滚动移动） -->
+          <!-- 网点滤镜（远处的云用）：每 n 像素取一个点，膨胀成比格子小一圈的方块（留缝），
+               再按透明度随机去掉一些格子 → 云的实心部分是整齐的网点，柔和的边缘越往外越稀，像印刷网点 -->
+          <svg class="halftone-defs" width="0" height="0" aria-hidden="true">
+            <defs>
+              <filter id="ht-far" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feFlood x="2" y="2" width="2" height="2"/><feComposite width="6" height="6"/><feTile result="grid"/>
+                <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="1" seed="6" result="noise"/>
+                <feComposite in="SourceAlpha" in2="noise" operator="arithmetic" k2="3" k3="-4.8" k4="1.2"/>
+                <feComponentTransfer result="keep"><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer>
+                <feComposite in="grid" in2="keep" operator="in" result="dots"/>
+                <feComposite in="SourceGraphic" in2="dots" operator="in"/>
+                <feMorphology operator="dilate" radius="1"/>
+              </filter>
+            </defs>
+          </svg>
+          <div class="clouds" aria-hidden="true" data-clouds></div>
+          <div class="balloons" aria-hidden="true">
+            <img class="fx balloon balloon--front" style="--x:964.2;--y:962.3;--w:312.1" src="./assets/home/balloon1.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--back" style="--x:137;--y:1189.3;--w:312.1" src="./assets/home/balloon2.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--back" style="--x:1167.3;--y:1145.9;--w:388.3" src="./assets/home/balloon3.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--front" style="--x:702.9;--y:1207.2;--w:540.5" src="./assets/home/balloon4.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--back" style="--x:432;--y:1394;--w:320.1" src="./assets/home/balloon5.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--front" style="--x:643;--y:1234;--w:177.5" src="./assets/home/balloon6.webp" alt="" data-balloon>
+            <img class="fx balloon balloon--back" style="--x:1470;--y:1189;--w:263.7" src="./assets/home/balloon7.webp" alt="" data-balloon>
+          </div>
+        </div>
+        <!-- 火箭：不随页面滚走；首屏时藏在左下角屏幕外，往下滚时沿直线飞向右上并逐渐变大（site.js） -->
+        <div class="rocket-layer" aria-hidden="true"><img class="rocket" src="./assets/home/rocket.webp" alt="" data-rocket><i class="sheen rocket-sheen" data-rocket-sheen></i></div>
+        <!-- 飞鸟飞行层：点 Experiences 的飞鸟后，飞鸟换到这一层沿路径飞（不受区块裁切） -->
+        <div class="flight-layer" aria-hidden="true" data-flight-layer></div>
+        <!-- 左侧索引栏：首页四个部分，点击跳转；滚动时高亮当前部分（site.js） -->
+        <nav class="hs-index" aria-label="页面索引">
+          <button type="button" data-hs-target="info" data-cursor="01"><i>01</i><span>个人简介</span></button>
+          <button type="button" data-hs-target="exp" data-cursor="02"><i>02</i><span>个人经历</span></button>
+          <button type="button" data-hs-target="works" data-cursor="03"><i>03</i><span>作品集</span></button>
+          <button type="button" data-hs-target="about" data-cursor="04"><i>04</i><span>关于我</span></button>
+        </nav>
+      </section>
+      <section class="page page--works" data-page="works" aria-label="作品集">
+        <div class="works">
+          <div class="works__head">
+            <div class="works__title"><b>作品集</b><span>WORKS · <em data-works-count></em></span></div>
+            <div class="filter" data-filter></div>
+          </div>
+          <div class="works__grid" data-works></div>
+        </div>
+      </section>
+
+      <section class="page page--resume" data-page="resume" aria-label="简历">
+        <div class="rz">
+          <aside class="rz-index">
+            <div class="rz-title"><b>简历</b><span>RESUME · CV</span></div>
+            <ol class="rz-nav" data-rz-nav></ol>
+            <div class="rz-progress">
+              <span data-rz-count>01 / 06</span>
+              <div class="rz-progress__bar"><i data-rz-bar></i></div>
+              <a class="btn" href="#" data-pdf data-magnet data-cursor="PDF">下载 PDF 简历 <span class="btn__arrow">↓</span></a>
+            </div>
+          </aside>
+          <div class="rz-scroll" data-rz-scroll></div>
+        </div>
+      </section>
+
+      <div class="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- 十字线光标（src/js/crosshair.js），放在最上层，全站通用 -->
+    <canvas class="xhair" aria-hidden="true"></canvas>
+    <div class="sweep" aria-hidden="true"><i class="sweep__cover"></i><i class="sweep__band"></i><i class="sweep__line"></i><i class="sweep__line"></i></div>
+  </main>
+
+  <!-- 背景里的星星、圆点、碎片、虚线、速度线和箭头：从 Figma「01 入场完成」导出（1600×900 画面坐标）。
+       在 Figma 里改完后，重新导出 SVG，把下面 <svg> 整段替换掉即可。每个顶层元素会单独漂浮、被炸飞。 -->
+  <template id="scene-elements">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+    <path d="M1256.3 60.6L1256.5 61.8L1256.7 63L1257 64.2L1257.2 65.4L1257.5 66.6L1257.9 67.8L1258.3 68.9L1258.9 70L1259.7 70.9L1260.7 71.6L1261.8 72.1L1263 72.5L1264.2 72.7L1265.4 72.9L1266.6 73L1267.8 73.1L1269 73.2L1270.3 73.3L1269.1 73.5L1267.9 73.7L1266.7 74L1265.5 74.2L1264.3 74.5L1263.1 74.9L1262 75.3L1260.9 75.9L1260 76.7L1259.3 77.7L1258.8 78.8L1258.4 80L1258.2 81.2L1258 82.4L1257.9 83.6L1257.8 84.8L1257.7 86L1257.6 87.3L1257.4 86L1257.2 84.8L1256.9 83.7L1256.7 82.5L1256.4 81.3L1256 80.1L1255.6 79L1255 77.9L1254.2 77L1253.2 76.3L1252.1 75.8L1250.9 75.4L1249.7 75.2L1248.5 75L1247.3 74.9L1246.1 74.8L1244.9 74.7L1243.6 74.6L1244.8 74.4L1246 74.2L1247.2 73.9L1248.4 73.7L1249.6 73.4L1250.8 73L1251.9 72.6L1253 72L1253.9 71.2L1254.6 70.2L1255.1 69.1L1255.5 67.9L1255.7 66.7L1255.9 65.5L1256 64.3L1256.1 63.1L1256.2 61.8L1256.3 60.6Z" fill="white"/>
+    <path d="M145.1 749.3L145.1 750L145.1 750.6L145.2 751.3L145.2 752L145.3 752.7L145.4 753.4L145.6 754L145.9 754.7L146.2 755.2L146.7 755.7L147.3 756L148 756.3L148.6 756.5L149.3 756.7L149.9 756.9L150.6 757L151.3 757.2L152 757.3L151.3 757.3L150.6 757.4L149.9 757.4L149.2 757.5L148.5 757.5L147.9 757.7L147.2 757.8L146.6 758.1L146 758.5L145.5 759L145.2 759.6L144.9 760.2L144.7 760.9L144.5 761.5L144.3 762.2L144.2 762.9L144.1 763.5L143.9 764.2L143.9 763.5L143.9 762.8L143.8 762.1L143.8 761.5L143.7 760.8L143.6 760.1L143.4 759.4L143.1 758.8L142.7 758.2L142.2 757.8L141.6 757.4L141 757.1L140.4 756.9L139.7 756.7L139 756.6L138.4 756.4L137.7 756.3L137 756.2L137.7 756.1L138.4 756.1L139.1 756.1L139.8 756L140.4 755.9L141.1 755.8L141.8 755.6L142.4 755.4L143 755L143.4 754.5L143.8 753.9L144.1 753.3L144.3 752.6L144.5 751.9L144.6 751.3L144.8 750.6L144.9 749.9L145.1 749.3Z" fill="white"/>
+    <path d="M38.1 724.6L38.1 725.5L38.2 726.4L38.3 727.4L38.4 728.3L38.5 729.2L38.7 730.2L39 731L39.4 731.9L39.9 732.7L40.6 733.3L41.4 733.7L42.3 734.1L43.2 734.4L44.1 734.6L45 734.8L45.9 734.9L46.9 735.1L47.8 735.3L46.9 735.3L45.9 735.4L45 735.5L44.1 735.6L43.1 735.7L42.2 735.9L41.3 736.2L40.5 736.6L39.7 737.1L39.1 737.8L38.6 738.6L38.3 739.5L38 740.4L37.8 741.3L37.6 742.2L37.4 743.2L37.2 744.1L37.1 745L37 744.1L37 743.1L36.9 742.2L36.8 741.3L36.6 740.3L36.4 739.4L36.2 738.5L35.8 737.7L35.2 736.9L34.5 736.3L33.7 735.8L32.9 735.5L32 735.2L31 735L30.1 734.8L29.2 734.6L28.3 734.5L27.4 734.3L28.3 734.2L29.2 734.2L30.2 734.1L31.1 734L32 733.8L32.9 733.6L33.8 733.4L34.7 733L35.4 732.4L36.1 731.7L36.5 730.9L36.9 730.1L37.1 729.2L37.4 728.3L37.6 727.3L37.7 726.4L37.9 725.5L38.1 724.6Z" fill="white"/>
+    <path d="M1104.1 637.6L1104.2 638.2L1104.3 638.9L1104.5 639.5L1104.6 640.1L1104.8 640.7L1105 641.3L1105.2 641.8L1105.5 642.4L1105.9 642.8L1106.5 643.2L1107 643.4L1107.6 643.6L1108.3 643.7L1108.9 643.8L1109.5 643.8L1110.1 643.9L1110.7 643.9L1111.4 644L1110.8 644.1L1110.1 644.2L1109.5 644.3L1108.9 644.5L1108.3 644.6L1107.7 644.8L1107.2 645.1L1106.6 645.4L1106.2 645.8L1105.8 646.3L1105.6 646.9L1105.4 647.5L1105.3 648.1L1105.2 648.7L1105.2 649.4L1105.1 650L1105.1 650.6L1105 651.2L1104.9 650.6L1104.8 650L1104.7 649.4L1104.5 648.8L1104.4 648.2L1104.2 647.6L1103.9 647L1103.6 646.5L1103.2 646L1102.7 645.7L1102.1 645.4L1101.5 645.3L1100.9 645.2L1100.3 645.1L1099.6 645L1099 645L1098.4 644.9L1097.8 644.9L1098.4 644.8L1099 644.7L1099.6 644.5L1100.2 644.4L1100.8 644.2L1101.4 644L1102 643.8L1102.5 643.5L1103 643.1L1103.3 642.5L1103.6 642L1103.7 641.4L1103.8 640.7L1103.9 640.1L1104 639.5L1104 638.9L1104.1 638.3L1104.1 637.6Z" fill="white"/>
+    <path d="M339.1 615.1L339.2 616.3L339.3 617.4L339.4 618.6L339.5 619.7L339.7 620.9L339.9 622L340.2 623.1L340.7 624.2L341.3 625.1L342.2 625.9L343.2 626.4L344.2 626.9L345.3 627.2L346.4 627.5L347.6 627.8L348.7 628L349.8 628.2L351 628.4L349.8 628.5L348.7 628.5L347.5 628.6L346.4 628.7L345.2 628.9L344.1 629.1L343 629.4L341.9 629.9L341 630.6L340.2 631.4L339.7 632.4L339.2 633.5L338.9 634.6L338.6 635.7L338.3 636.8L338.1 637.9L337.9 639.1L337.7 640.2L337.6 639.1L337.6 637.9L337.5 636.8L337.3 635.6L337.2 634.5L337 633.4L336.7 632.2L336.2 631.2L335.5 630.3L334.7 629.5L333.7 628.9L332.6 628.5L331.5 628.1L330.4 627.8L329.3 627.6L328.1 627.4L327 627.2L325.9 627L327 626.9L328.2 626.8L329.3 626.7L330.5 626.6L331.6 626.4L332.7 626.2L333.8 625.9L334.9 625.4L335.8 624.8L336.6 623.9L337.2 622.9L337.6 621.9L338 620.8L338.2 619.7L338.5 618.5L338.7 617.4L338.9 616.3L339.1 615.1Z" fill="white"/>
+    <path d="M115.9 104L116.1 105.4L116.2 106.7L116.4 108L116.6 109.3L116.9 110.7L117.2 112L117.6 113.2L118.2 114.4L119.1 115.5L120.1 116.3L121.3 116.9L122.6 117.4L123.9 117.7L125.2 118L126.5 118.2L127.9 118.4L129.2 118.5L130.5 118.7L129.2 118.9L127.9 119L126.5 119.2L125.2 119.4L123.9 119.7L122.6 120L121.3 120.5L120.1 121.1L119.1 121.9L118.2 122.9L117.6 124.1L117.2 125.4L116.8 126.7L116.6 128L116.4 129.3L116.2 130.7L116 132L115.8 133.3L115.7 132L115.5 130.7L115.3 129.3L115.1 128L114.9 126.7L114.5 125.4L114.1 124.1L113.5 122.9L112.7 121.9L111.6 121L110.4 120.4L109.2 120L107.9 119.7L106.5 119.4L105.2 119.2L103.9 119L102.6 118.8L101.2 118.7L102.6 118.5L103.9 118.3L105.2 118.1L106.5 117.9L107.9 117.7L109.2 117.3L110.4 116.9L111.6 116.3L112.7 115.5L113.5 114.4L114.1 113.2L114.6 112L114.9 110.7L115.2 109.3L115.4 108L115.6 106.7L115.7 105.4L115.9 104Z" fill="white"/>
+    <path d="M31.9 170.2L32.1 170.9L32.2 171.7L32.4 172.4L32.6 173.2L32.8 173.9L33 174.6L33.3 175.3L33.7 176L34.2 176.5L34.9 177L35.6 177.3L36.3 177.4L37.1 177.6L37.8 177.7L38.6 177.7L39.3 177.8L40.1 177.8L40.9 177.8L40.1 178L39.4 178.2L38.6 178.3L37.9 178.5L37.1 178.7L36.4 178.9L35.7 179.3L35.1 179.7L34.5 180.2L34.1 180.8L33.8 181.5L33.6 182.2L33.5 183L33.4 183.8L33.3 184.5L33.3 185.3L33.2 186L33.2 186.8L33 186.1L32.9 185.3L32.7 184.6L32.5 183.8L32.3 183.1L32.1 182.4L31.8 181.7L31.4 181L30.9 180.5L30.2 180L29.5 179.7L28.8 179.5L28 179.4L27.3 179.3L26.5 179.3L25.8 179.2L25 179.2L24.2 179.1L25 179L25.7 178.8L26.5 178.7L27.2 178.5L28 178.3L28.7 178L29.4 177.7L30 177.3L30.6 176.8L31 176.2L31.3 175.5L31.5 174.7L31.6 174L31.7 173.2L31.8 172.5L31.8 171.7L31.9 170.9L31.9 170.2Z" fill="white"/>
+    <path d="M1139.1 817.9L1139.2 818.6L1139.2 819.2L1139.3 819.8L1139.4 820.5L1139.6 821.1L1139.7 821.7L1140 822.3L1140.3 822.9L1140.7 823.4L1141.2 823.8L1141.8 824.1L1142.4 824.3L1143 824.4L1143.6 824.5L1144.3 824.6L1144.9 824.7L1145.5 824.8L1146.2 824.9L1145.5 824.9L1144.9 825L1144.3 825.1L1143.6 825.2L1143 825.4L1142.4 825.5L1141.8 825.7L1141.2 826.1L1140.7 826.5L1140.3 827L1140 827.5L1139.8 828.1L1139.7 828.8L1139.6 829.4L1139.5 830L1139.4 830.7L1139.3 831.3L1139.2 832L1139.2 831.3L1139.1 830.7L1139 830L1138.9 829.4L1138.7 828.8L1138.6 828.2L1138.3 827.6L1138 827L1137.6 826.5L1137.1 826.1L1136.6 825.8L1135.9 825.6L1135.3 825.5L1134.7 825.3L1134.1 825.2L1133.4 825.2L1132.8 825.1L1132.1 825L1132.8 824.9L1133.4 824.9L1134 824.8L1134.7 824.6L1135.3 824.5L1135.9 824.3L1136.5 824.1L1137.1 823.8L1137.6 823.4L1138 822.9L1138.3 822.3L1138.5 821.7L1138.6 821.1L1138.7 820.5L1138.8 819.8L1138.9 819.2L1139 818.6L1139.1 817.9Z" fill="white"/>
+    <path d="M167.7 896.4L167.9 898.2L168.1 900L168.3 901.9L168.5 903.7L168.9 905.5L169.3 907.2L169.8 909L170.6 910.6L171.7 912L173.1 913.2L174.7 914.1L176.4 914.7L178.2 915.2L180 915.6L181.8 915.9L183.6 916.2L185.4 916.5L187.2 916.7L185.4 916.9L183.5 917.1L181.7 917.3L179.9 917.6L178.1 917.9L176.4 918.3L174.6 918.9L173 919.7L171.5 920.8L170.4 922.2L169.5 923.8L168.9 925.5L168.4 927.2L168 929L167.7 930.8L167.4 932.6L167.1 934.4L166.9 936.2L166.7 934.4L166.5 932.6L166.3 930.8L166 929L165.7 927.2L165.3 925.4L164.7 923.7L163.9 922L162.8 920.6L161.4 919.4L159.8 918.6L158.1 917.9L156.4 917.4L154.6 917L152.8 916.7L151 916.4L149.2 916.2L147.4 915.9L149.2 915.7L151 915.5L152.8 915.3L154.6 915.1L156.4 914.7L158.2 914.3L159.9 913.8L161.6 913L163 911.9L164.2 910.5L165 908.9L165.7 907.2L166.2 905.4L166.6 903.6L166.9 901.8L167.2 900L167.4 898.2L167.7 896.4Z" fill="white"/>
+    <path d="M1548.6 452.3L1548.6 452.7L1548.7 453.1L1548.7 453.5L1548.8 453.9L1548.9 454.2L1549 454.6L1549.1 455L1549.3 455.3L1549.6 455.6L1549.9 455.9L1550.2 456L1550.6 456.2L1551 456.3L1551.4 456.3L1551.8 456.4L1552.2 456.4L1552.6 456.5L1553 456.5L1552.6 456.5L1552.2 456.6L1551.8 456.7L1551.4 456.7L1551 456.8L1550.6 456.9L1550.3 457.1L1549.9 457.3L1549.6 457.5L1549.4 457.8L1549.2 458.2L1549.1 458.6L1549 458.9L1549 459.3L1548.9 459.7L1548.9 460.1L1548.8 460.5L1548.8 460.9L1548.7 460.5L1548.7 460.1L1548.6 459.7L1548.5 459.3L1548.4 459L1548.3 458.6L1548.2 458.2L1548 457.9L1547.8 457.6L1547.4 457.3L1547.1 457.2L1546.7 457L1546.3 457L1545.9 456.9L1545.6 456.8L1545.2 456.8L1544.8 456.8L1544.4 456.7L1544.8 456.7L1545.2 456.6L1545.5 456.5L1545.9 456.5L1546.3 456.4L1546.7 456.3L1547.1 456.1L1547.4 455.9L1547.7 455.7L1547.9 455.4L1548.1 455L1548.2 454.6L1548.3 454.3L1548.4 453.9L1548.4 453.5L1548.5 453.1L1548.5 452.7L1548.6 452.3Z" fill="white"/>
+    <path d="M231.7 251.9L231.8 252.7L231.8 253.5L231.9 254.3L232 255L232.1 255.8L232.3 256.6L232.5 257.4L232.8 258.1L233.3 258.7L233.9 259.2L234.6 259.6L235.3 259.9L236.1 260.1L236.8 260.3L237.6 260.5L238.4 260.6L239.2 260.7L239.9 260.9L239.2 260.9L238.4 261L237.6 261.1L236.8 261.2L236 261.3L235.3 261.4L234.5 261.7L233.8 262L233.2 262.5L232.6 263L232.3 263.7L232 264.5L231.7 265.2L231.6 266L231.4 266.8L231.3 267.5L231.1 268.3L231 269.1L230.9 268.3L230.9 267.5L230.8 266.7L230.7 266L230.6 265.2L230.4 264.4L230.2 263.6L229.9 262.9L229.4 262.3L228.8 261.8L228.1 261.4L227.4 261.1L226.6 260.9L225.9 260.7L225.1 260.5L224.3 260.4L223.5 260.3L222.8 260.1L223.6 260.1L224.3 260L225.1 259.9L225.9 259.8L226.7 259.7L227.5 259.6L228.2 259.3L228.9 259L229.6 258.5L230.1 258L230.5 257.3L230.7 256.5L231 255.8L231.1 255L231.3 254.2L231.4 253.5L231.6 252.7L231.7 251.9Z" fill="white"/>
+    <path d="M609.6 138.1L618.8 166.7L649.4 169.7L624.3 186.8L630.8 216L606.1 198.1L579.6 213.2L589.4 184.9L566.5 165.1L597.2 165.5L609.6 138.1Z" fill="white"/>
+    <path d="M460.1 615.5L467.1 624.2L477.9 621.2L471.8 630.6L478 639.9L467.1 637L460.1 645.8L459.6 634.6L449.2 630.6L459.7 626.7L460.1 615.5Z" fill="white"/>
+    <path d="M431.8 748.6L438.1 760L451.1 758.6L442.2 768.1L447.5 780.1L435.7 774.6L426 783.3L427.6 770.3L416.3 763.8L429 761.3L431.8 748.6Z" fill="white"/>
+    <path d="M809.2 94.2L809.3 96.4L809.5 98.6L809.7 100.7L809.9 102.9L810.2 105L810.6 107.2L811.2 109.3L812.1 111.2L813.4 113L815 114.4L816.9 115.5L818.9 116.4L820.9 117L823.1 117.5L825.2 118L827.3 118.4L829.4 118.8L831.6 119.1L829.4 119.3L827.2 119.5L825.1 119.7L822.9 119.9L820.8 120.2L818.6 120.6L816.6 121.2L814.6 122.1L812.8 123.4L811.4 125L810.3 126.9L809.5 128.9L808.8 130.9L808.3 133.1L807.8 135.2L807.4 137.3L807 139.4L806.7 141.6L806.5 139.4L806.4 137.2L806.2 135.1L805.9 132.9L805.6 130.8L805.2 128.6L804.6 126.6L803.7 124.6L802.5 122.8L800.8 121.4L799 120.3L797 119.5L794.9 118.8L792.8 118.3L790.7 117.8L788.5 117.4L786.4 117L784.2 116.7L786.4 116.5L788.6 116.4L790.7 116.2L792.9 115.9L795 115.6L797.2 115.2L799.3 114.6L801.2 113.7L803 112.5L804.4 110.8L805.5 109L806.4 107L807 104.9L807.5 102.8L808 100.6L808.4 98.5L808.8 96.4L809.2 94.2Z" fill="#FF4B86"/>
+    <path d="M1278.5 -3.4L1279.1 -1L1279.6 1.3L1280.1 3.6L1280.7 5.9L1281.4 8.2L1282.2 10.4L1283.2 12.6L1284.5 14.6L1286.2 16.3L1288.2 17.6L1290.4 18.5L1292.7 19L1295 19.4L1297.4 19.6L1299.8 19.8L1302.2 19.9L1304.5 20L1306.9 20L1304.6 20.5L1302.3 21.1L1300 21.6L1297.7 22.2L1295.4 22.9L1293.1 23.7L1291 24.7L1289 26L1287.3 27.6L1286 29.6L1285.1 31.8L1284.5 34.2L1284.2 36.5L1283.9 38.9L1283.8 41.3L1283.7 43.6L1283.6 46L1283.6 48.4L1283.1 46.1L1282.5 43.8L1282 41.4L1281.4 39.1L1280.7 36.8L1279.9 34.6L1278.9 32.5L1277.6 30.4L1275.9 28.7L1273.9 27.4L1271.7 26.6L1269.4 26L1267.1 25.6L1264.7 25.4L1262.3 25.3L1259.9 25.2L1257.6 25.1L1255.2 25L1257.5 24.5L1259.8 24L1262.1 23.4L1264.4 22.8L1266.7 22.1L1269 21.3L1271.1 20.3L1273.1 19.1L1274.8 17.4L1276.1 15.4L1277 13.2L1277.6 10.9L1277.9 8.5L1278.2 6.2L1278.3 3.8L1278.4 1.4L1278.5 -1L1278.5 -3.4Z" stroke="white" stroke-width="2.5"/>
+    <path d="M1167.6 908C1174.9 907.6 1180.6 901.4 1180.2 894.1C1179.9 886.7 1173.7 881.1 1166.3 881.4C1159 881.7 1153.3 888 1153.7 895.3C1154 902.6 1160.2 908.3 1167.6 908Z" fill="white"/>
+    <path d="M1327.4 763.1C1337.9 762.4 1345.8 753.4 1345.2 742.9C1344.5 732.4 1335.4 724.5 1324.9 725.2C1314.5 725.9 1306.5 734.9 1307.2 745.4C1307.9 755.9 1317 763.8 1327.4 763.1Z" fill="#FF4B86"/>
+    <path d="M442.6 132.3C448.4 132.2 452.9 127.5 452.8 121.7C452.7 116 447.9 111.4 442.2 111.5C436.5 111.7 431.9 116.4 432 122.2C432.1 127.9 436.9 132.5 442.6 132.3Z" fill="white"/>
+    <path d="M1382.4 242.6C1388.6 242.6 1393.6 237.6 1393.6 231.4C1393.5 225.2 1388.5 220.2 1382.3 220.2C1376.1 220.2 1371.1 225.2 1371.2 231.4C1371.2 237.6 1376.2 242.6 1382.4 242.6Z" fill="#FF0A3C"/>
+    <path d="M159.9 398.9C166.1 398.9 171.1 393.9 171.2 387.8C171.2 381.6 166.3 376.5 160.1 376.5C153.9 376.4 148.8 381.4 148.8 387.5C148.7 393.7 153.7 398.8 159.9 398.9Z" fill="#FF0A3C"/>
+    <path d="M402.3 184C409.8 184.2 416.1 178.3 416.3 170.7C416.5 163.1 410.5 156.8 403 156.7C395.4 156.5 389.1 162.4 388.9 170C388.7 177.6 394.7 183.9 402.3 184Z" fill="#FF4B86"/>
+    <path d="M1360.7 48.1C1370.2 47.3 1377.3 39 1376.6 29.5C1375.8 19.9 1367.5 12.8 1358 13.6C1348.4 14.3 1341.3 22.6 1342.1 32.2C1342.8 41.7 1351.1 48.8 1360.7 48.1Z" fill="#FF4B86"/>
+    <path d="M295 173.9C304.9 173.6 312.7 165.3 312.4 155.4C312.1 145.4 303.7 137.6 293.8 138C283.9 138.3 276.1 146.6 276.4 156.5C276.7 166.5 285 174.3 295 173.9Z" fill="white"/>
+    <path d="M929.2 781.8C933.3 781.8 936.7 778.6 936.8 774.5C936.8 770.4 933.6 767 929.5 767C925.4 766.9 922 770.2 922 774.2C921.9 778.3 925.2 781.7 929.2 781.8Z" fill="#FF0A3C"/>
+    <path d="M452.5 516.9L436.2 527.4L459.4 563.6L475.7 553.1L452.5 516.9Z" fill="#FF0A3C"/>
+    <path d="M1336.1 807L1316.9 817.5L1342.7 864.5L1361.9 854L1336.1 807Z" fill="#FF0A3C"/>
+    <path d="M1111 635.2L1100 620.3L1063.9 646.9L1074.9 661.9L1111 635.2Z" fill="#FF4B86"/>
+    <path d="M437.5 748.2L426.6 732.7L385.1 761.9L396 777.4L437.5 748.2Z" fill="#FF4B86"/>
+    <path d="M964 878.2L947 886L962.6 920.3L979.6 912.5L964 878.2Z" fill="#FF0A3C"/>
+    <path d="M1275.8 336.6L1258.7 313.5L1199.4 357.6L1216.5 380.6L1275.8 336.6Z" fill="#FF4B86"/>
+    <path d="M1495.6 264L1482.9 238.2L1429.1 264.7L1441.7 290.4L1495.6 264Z" fill="white"/>
+    <path d="M1135.1 908.9L1384.2 823.3" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="36 12 8 12"/>
+    <path d="M298.8 220.3L449.1 148" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="36 12 8 12"/>
+    <path d="M1375.6 67.3L1554.4 -17.7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="36 12 8 12"/>
+    <path d="M1262.7 451L1498.6 331.4" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="36 12 8 12"/>
+    <path d="M169.1 90.2L373.7 0.3" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="36 12 8 12"/>
+    <path d="M1356 713.1L1465.3 667.2L1576.1 625.3L1466.9 671.2L1356 713.1Z" fill="white"/>
+    <path d="M674.2 754.4L759 697.5L846.7 645.1L761.9 702L674.2 754.4Z" fill="white"/>
+    <path d="M3.3 725.9L196.4 646.9L392.3 574.7L199.1 653.7L3.3 725.9Z" fill="white"/>
+    <g>
+      <path d="M1503.7 611.1L1431.5 664.9" stroke="#FF0A3C" stroke-width="7" stroke-dasharray="16 9"/>
+      <path d="M1423.5 670.9L1380.2 703.1" stroke="#FF0A3C" stroke-width="7"/>
+      <path d="M1393 713.6L1356.1 721.1L1373.8 687.9L1393 713.6Z" fill="#FF0A3C"/>
+    </g>
+    </svg>
+  </template>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="./src/js/crosshair.js?v=batch1-1"></script>
+  <script src="./src/js/home-scene.js?v=px-1"></script>
+  <script src="./src/js/content.js?v=am-edit-1"></script>
+  <script src="./src/js/games-data.js?v=3"></script>
+  <script src="./src/js/orb-data.js?v=4"></script>
+  <script src="./src/js/orb-pixels.js?v=10"></script>
+  <script src="./src/js/exp-icons.js?v=7"></script>
+  <script src="./src/js/site.js?v=am-edit-1"></script>
+  <script src="./src/js/loading.js?v=speed-1"></script>
+</body>
+</html>

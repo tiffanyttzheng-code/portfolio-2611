@@ -1,0 +1,323 @@
+:root {
+  --sky: #56CFF0;
+  --cyan: #2EDCF7;
+  --red: #FF0A3C;
+  --pink: #FF4B86;
+  --white: #FFFFFF;
+  --mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; overflow: hidden; background: #fff; }
+body { font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif; }
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--sky);
+  --bs: 0;          /* 爆炸物当前尺寸，由 JS 每帧写入 */
+  --flow: 1.3s;     /* 能量点列流速 */
+  --pulse: 1.4s;    /* 光晕脉冲周期 */
+}
+
+/* 斜向擦入：三角形从左下角长出，直到盖满整屏 */
+/* 天空底色一直在场景下面；开场由上层的 .sweep 掠过露出 */
+.wipe {
+  position: absolute;
+  inset: 0;
+}
+.wipe--red { display: none; }
+/* loading 和爆炸阶段的背景：Figma「Frame 8」的渐变天空（和主页同一张），图片没加载出来时退回纯天蓝 */
+.wipe--sky { background: url("../../assets/home/sky.webp") center / cover no-repeat, var(--sky); }
+
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* 噪点：白色细颗粒，按帧跳动 */
+.grain {
+  position: absolute;
+  inset: -50%;
+  opacity: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.2 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain .45s steps(3) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(-3%, 2%); }
+  66%  { transform: translate(2%, -3%); }
+  100% { transform: translate(-1%, 1%); }
+}
+
+/* 交叉警示条 */
+.hazard {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+/* 两条粗警示带（按 Figma「03 临界」）：红底白纹、白底红纹，条纹由 JS 生成，粗细不规则 */
+.hazard i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3200px;
+  height: 19vmin;
+  margin: -9.5vmin 0 0 -1600px;
+  overflow: hidden;
+  background: var(--red);
+  color: #fff;
+  animation: blink .12s steps(2) infinite;
+}
+.hazard i:nth-child(2) {
+  height: 22vmin;
+  margin-top: -11vmin;
+  background: #fff;
+  color: var(--red);
+}
+.hazard b {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: currentColor;
+}
+@keyframes blink { 50% { opacity: .78; } }
+
+/* 爆炸物：80vmin 是满尺寸，scale 由 JS 控制 */
+.bomb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80vmin;
+  height: 80vmin;
+  margin: -40vmin 0 0 -40vmin;
+  transform: scale(0);
+  will-change: transform;
+}
+.bomb__shake, .bomb__squash, .bomb svg { width: 100%; height: 100%; }
+.bomb svg { overflow: visible; display: block; }
+.bomb__halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse var(--pulse) ease-in-out infinite;
+}
+@keyframes pulse { 50% { transform: scale(1.14); opacity: .22; } }
+.bomb__ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 7s linear infinite;
+}
+.bomb__spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: twinkle 1.1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes twinkle { 50% { opacity: .35; } }
+/* 像素装饰：像素星一格一格地闪（steps，没有柔和过渡），点线和方块簇半透明一点 */
+.pxstar { animation: px-blink 2.4s steps(1) infinite; }
+@keyframes px-blink { 0%, 55% { opacity: 1; } 62% { opacity: .15; } 70% { opacity: .8; } 78% { opacity: 0; } 88% { opacity: 1; } }
+.pxline, .pxcluster { opacity: .75; }
+
+/* 每次尺寸跳变时放出的冲击环 */
+.shock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 18px currentColor, inset 0 0 12px currentColor; /* 波纹带一圈同色辉光 */
+  pointer-events: none;
+}
+
+/* HUD：所有位置都跟随爆炸物半径 --R */
+.hud {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  --R: calc(var(--bs) * 23.2vmin);
+  font: 700 12px/1 var(--mono);
+  letter-spacing: .14em;
+}
+.hud__line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--R) * 2 + 300px);
+  height: 1px;
+  transform: translate(-50%, -50%) rotate(-28deg);
+  background: repeating-linear-gradient(90deg, #fff 0 12px, transparent 12px 18px);
+  opacity: .85;
+}
+.hud__lock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--R) * 2 + 70px);
+  aspect-ratio: 1;
+  animation: lock 10s linear infinite;
+}
+@keyframes lock {
+  from { transform: translate(-50%, -50%) rotate(45deg); }
+  to   { transform: translate(-50%, -50%) rotate(405deg); }
+}
+.hud__lock i {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+}
+.hud__lock i:nth-child(1) { left: 0;  top: 0;    border-right: 0; border-bottom: 0; }
+.hud__lock i:nth-child(2) { right: 0; top: 0;    border-left: 0;  border-bottom: 0; }
+.hud__lock i:nth-child(3) { left: 0;  bottom: 0; border-right: 0; border-top: 0; }
+.hud__lock i:nth-child(4) { right: 0; bottom: 0; border-left: 0;  border-top: 0; }
+
+.hud__tag {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+.hud__tag b { font-weight: 400; opacity: .8; margin-right: 10px; }
+.hud__tag::after {
+  content: "";
+  position: absolute;
+  width: 46px;
+  height: 1px;
+  background: #fff;
+}
+.hud__tag--pressure {
+  background: var(--red);
+  color: #fff;
+  transform: translate(calc(var(--R) * .72 + 44px), calc(var(--R) * -.72 - 58px));
+}
+.hud__tag--pressure::after { left: -40px; bottom: -14px; transform: rotate(-35deg); }
+.hud__tag--state {
+  background: #fff;
+  color: var(--red);
+  transform: translate(calc(-100% - var(--R) * .72 - 44px), calc(var(--R) * .72 + 30px));
+}
+.hud__tag--state::after { right: -40px; top: -14px; transform: rotate(-35deg); }
+.hud__tag--state.is-critical {
+  background: var(--red);
+  color: #fff;
+  animation: blink .16s steps(2) infinite;
+}
+
+.hero {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.home-bg {
+  position: absolute;
+  inset: 0;
+  background: url("../../assets/home/sky.webp") center / cover no-repeat;
+}
+.home-orb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.home-window {
+  position: absolute;
+  left: 15vw;
+  top: 20vh;
+  height: 60vh;
+  aspect-ratio: 600 / 900;
+}
+.home-window__frame, .home-window__ascii {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.home-window__ascii { filter: drop-shadow(0 0 3px rgba(255, 255, 255, .45)); }
+
+
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.burst i { position: absolute; display: block; }
+
+.starburst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 130vmin;
+  height: 130vmin;
+  margin: -65vmin 0 0 -65vmin;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 开场掠过转场：三层都用 JS 写 clip-path，斜边方向和构图主轴一致 */
+.sweep, .sweep i {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sweep i { display: block; clip-path: polygon(0 0, 0 0, 0 0); }
+.sweep i.sweep__cover { clip-path: none; } /* 脚本还没跑时整屏是天蓝，不会闪出场景 */
+.sweep__cover { background: url("../../assets/home/sky.webp") center / cover no-repeat, var(--sky); } /* 红带掠过前是同一片渐变天空 */
+.sweep__band { background: var(--red); }
+.sweep__line { background: var(--sky); }
+
+/* 字符化的点：墨点、半调网点、能量点列 */
+.glyph {
+  font-family: ui-monospace, "JetBrains Mono", Consolas, monospace;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* 像素特效层（loading.js 的 pxfx）：铺满画面，在爆炸物和白闪之间 */
+.pxfx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  left: 32px; /* 放在左下角，数字和 LOADING 行左对齐 */
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--red); /* 加载数字用红色，和 Figma 一致 */
+  font: 700 12px/1 var(--mono);
+  letter-spacing: .3em;
+  opacity: 0;
+}
+.label__pct { font-size: 20px; letter-spacing: .02em; }
+.label__pct b { font-size: clamp(40px, 5vw, 72px); font-weight: 800; }
+.label__row { display: flex; gap: 14px; }
+.label__bar { letter-spacing: .08em; }
+
+
+@media (max-width: 640px) {
+  .label { left: 16px; bottom: 64px; }
+  .hud { font-size: 10px; }
+}

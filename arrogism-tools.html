@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>自负内容工具 · Bae 作品集</title><link rel="stylesheet" href="./src/css/arrogism.css?v=back-fixcte-1"><link rel="stylesheet" href="./src/css/work.css?v=live-2"><link rel="stylesheet" href="./src/css/arrogism-tools.css"><link rel="preload" as="font" href="./assets/fonts/xuanhei-tools.woff2" type="font/woff2" crossorigin></head>
+<body class="work">
+<header><a class="back" href="./index.html#/home" aria-label="返回作品集"><i class="back__arrow" aria-hidden="true"></i><span class="back__txt" aria-hidden="true">BACK</span><span class="back__sub" aria-hidden="true">WORKS</span></a></header>
+<aside aria-label="作品目录"><div class="project"><span class="project__tag" aria-hidden="true">TOOL_01</span><span class="project__frame"><span class="project__name">自负<br>内容工具</span></span><small>游戏制作配套工具集</small></div><nav aria-label="自负内容工具目录"><span class="nav__head" aria-hidden="true">INDEX</span><button data-target="overview" aria-current="true"><b aria-hidden="true">01</b><span class="nav__label">项目概览</span></button><button data-target="introduction"><b aria-hidden="true">02</b><span class="nav__label">工具介绍</span></button><button data-target="story-editor"><b aria-hidden="true">03</b><span class="nav__label">剧情编辑器</span></button><button data-target="table-export"><b aria-hidden="true">04</b><span class="nav__label">表格导出工具</span></button></nav></aside>
+<main class="pages"><section class="page tools-intro" id="overview" data-anchor="项目概览" aria-labelledby="tools-title">
+<div class="tools-canvas">
+<h1 id="tools-title">自负<br>内容工具</h1>
+<div class="tools-subtitle"><span class="tools-rule"><img src="./assets/Work/2-1/rule.svg" alt="" width="57" height="2"></span><p>&lt;自负&gt;游戏制作配套<span>工具集</span></p></div>
+<ul class="tools-features"><li>{剧情编辑器}</li><li>{一键导表}</li><li>{自动化流程}</li></ul>
+<div class="tools-shot tools-shot--editor"><div><img src="./assets/Work/2-1/editor.png" alt="自负剧情编辑器：剧情列表与游戏对话预览" fetchpriority="high"></div></div>
+<div class="tools-shot tools-shot--workspace"><div><img src="./assets/Work/2-1/workspace.png" alt="自负内容工作台：剧情编辑器、地图交互、联系簿与图鉴、UI内容入口" fetchpriority="high"></div></div>
+</div></section><section class="page tools-description" id="introduction" data-anchor="工具介绍" aria-label="工具介绍与痛点转化">
+<div class="td-panel">
+<section class="td-intro"><h2><span class="td-marker"><img src="./assets/Work/2-1/intro-marker.svg" alt=""></span>{ 工具介绍 }</h2>
+<div class="td-copy"><p><strong>本作品是《自负》项目的配套内容工具。主要分为<em>剧情编辑器</em>与<em>表格内容导入</em>两个部分</strong>。</p><p>工具以飞书表格为内容源。</p><p class="td-part"><span>A</span><strong>剧情编辑器</strong>可将剧情、地图、UI、图鉴等模块的原始表格进入工具中进行剧情效果预览并编辑修改；</p><p class="td-part"><span>B</span><strong>导表工具</strong>则可以实现配置表修改后通过工具的自动化流程完成UE内data表的重新导入，实现一键更新。</p></div></section>
+<section class="td-pains"><h2><span class="td-marker"><img src="./assets/Work/2-1/pain-marker.svg" alt=""></span>{ 痛点转化 }</h2><div class="td-comparison"><div class="td-columns"><span>原有问题</span><span>工具里的解法</span></div>
+<ol class="td-rows">
+<li><span class="td-number">01</span><p>剧情分散在飞书多张表中，Block 和台词按小节分别存放。</p><span class="td-arrow" aria-hidden="true">→</span><p>按章节和小节选择，一次读出整个小节。</p></li>
+<li><span class="td-number">02</span><p>仅仅通过表格看不到立绘、情绪气泡、震动等画面预览效果。</p><span class="td-arrow" aria-hidden="true">→</span><p>逐句实时预览，作为 UE 画面制作的参照。</p></li>
+<li><span class="td-number">03</span><p>UE 导入表格的流程繁琐，人工手动导入容易校验出错。</p><span class="td-arrow" aria-hidden="true">→</span><p>在工具中设计自动化流程，实现一键导入。</p></li>
+<li><span class="td-number">04</span><p>各个模块的配置表格数量较多，需要有统一管理并记录导表数据的路径。</p><span class="td-arrow" aria-hidden="true">→</span><p>在工具内对表格进行分模块整理，记录每次导入表格的导入时间、更新内容等信息。</p></li>
+</ol></div></section></div></section><section class="page editor-detail" id="story-editor" data-anchor="剧情编辑器" aria-label="剧情编辑器"><div class="editor-stage"><span class="cte-asset cte-triangle" style="left:73px;top:96px"><img src="./assets/Work/2-1/pain-marker.svg" alt=""></span>
+<div class="cte-text cte-bold" style="left:165px;top:81px;width:600px;font-size:42px">{ A 剧情编辑器 }</div>
+<div class="cte-path"><strong>编辑路径</strong><p>飞书读取 → 选择 Block / 台词 → 配置文本与演出 → 实时预览 → 保存草稿 → <b>覆盖回原表</b>OR<b>导入UE数据表</b></p></div><div class="cte-screenshot"><img class="zoom-src" src="./assets/Work/2-1/editor.png" alt="剧情编辑器界面：章节、Block、台词选择，演出配置、实时预览和保存导出"><button class="zoom-hit" type="button" aria-label="放大查看剧情编辑器界面"><span>点击放大</span></button></div>
+<i class="cte-highlight" style="left:253px;top:340px;width:378px;height:30px" aria-hidden="true"></i>
+<i class="cte-highlight" style="left:608px;top:800px;width:734px;height:208px" aria-hidden="true"></i>
+<i class="cte-highlight" style="left:667px;top:372px;width:646px;height:401px" aria-hidden="true"></i>
+<i class="cte-highlight" style="left:1020px;top:338px;width:340px;height:31px" aria-hidden="true"></i>
+<i class="cte-highlight" style="left:117px;top:431px;width:174px;height:543px" aria-hidden="true"></i>
+<i class="cte-highlight" style="left:303px;top:398px;width:293px;height:610px" aria-hidden="true"></i>
+<div class="cte-text cte-label" style="left:256px;top:308px;width:102px;font-size:16px">1　章节选择</div>
+<div class="cte-text cte-label" style="left:1232px;top:809px;width:102px;font-size:16px">4　编辑配置</div>
+<div class="cte-text cte-label" style="left:693px;top:477px;width:102px;font-size:16px">5　画面预览</div>
+<div class="cte-text cte-label" style="left:1020px;top:308px;width:129px;font-size:16px">6　保存&导出</div>
+<div class="cte-text cte-label" style="left:121px;top:401px;width:116px;font-size:16px">2　block选择</div>
+<div class="cte-text cte-label" style="left:471px;top:971px;width:116px;font-size:16px">3　台词选择</div>
+<div class="cte-text cte-yellow cte-bold" style="left:1445px;top:480px;width:60px;font-size:23px">01</div>
+<div class="cte-text cte-bold" style="left:1498px;top:478px;width:340px;font-size:26px">章节 Chapter</div>
+<div class="cte-text cte-muted" style="left:1498px;top:515.69px;width:340px;font-size:20px">故事顺序与解锁关系</div>
+<div class="cte-text cte-yellow cte-bold" style="left:1445px;top:560.65px;width:60px;font-size:23px">02</div>
+<div class="cte-text cte-bold" style="left:1498px;top:558.65px;width:340px;font-size:26px">小节 Stage</div>
+<div class="cte-text cte-muted" style="left:1498px;top:596.3399999999999px;width:340px;font-size:20px">地图承接与剧情入口</div>
+<div class="cte-text cte-yellow cte-bold" style="left:1445px;top:641.31px;width:60px;font-size:23px">03</div>
+<div class="cte-text cte-bold" style="left:1498px;top:639.31px;width:340px;font-size:26px">段落 Block</div>
+<div class="cte-text cte-muted" style="left:1498px;top:677px;width:340px;font-size:20px">推进路径与节点连线</div>
+<div class="cte-text cte-yellow cte-bold" style="left:1445px;top:721.96px;width:60px;font-size:23px">04</div>
+<div class="cte-text cte-bold" style="left:1498px;top:719.96px;width:340px;font-size:26px">台词 Dialogue</div>
+<div class="cte-text cte-muted" style="left:1498px;top:757.6500000000001px;width:340px;font-size:20px">文本、立绘与演出配置</div>
+<div class="cte-text cte-yellow cte-bold" style="left:1445px;top:799px;width:60px;font-size:23px">05</div>
+<div class="cte-text cte-bold" style="left:1498px;top:797px;width:340px;font-size:26px">特殊行 Cue</div>
+<div class="cte-text cte-muted" style="left:1498px;top:834.69px;width:340px;font-size:20px">任务、提示文字、转场</div>
+<span class="cte-asset cte-triangle" style="left:73px;top:1171px"><img src="./assets/Work/2-1/intro-marker.svg" alt=""></span>
+<div class="cte-text cte-bold" style="left:126px;top:1158px;width:650px;font-size:40px">{ 剧情编辑器配置拆解}</div>
+<div class="cte-text cte-yellow cte-bold" style="left:126px;top:1282px;width:50px;font-size:24px">01</div>
+<div class="cte-text cte-bold" style="left:179px;top:1276px;width:407px;font-size:29px">流程 / Block</div>
+<i class="cte-divider" style="left:126px;top:1318px;width:460px"></i>
+<div class="cte-text cte-yellow cte-bold" style="left:657px;top:1282px;width:50px;font-size:24px">02</div>
+<div class="cte-text cte-bold" style="left:710px;top:1276px;width:459px;font-size:29px">文本 / Dialogue</div>
+<i class="cte-divider" style="left:657px;top:1318px;width:512px"></i>
+<div class="cte-text cte-yellow cte-bold" style="left:1250px;top:1282px;width:50px;font-size:24px">03</div>
+<div class="cte-text cte-bold" style="left:1303px;top:1276px;width:453px;font-size:29px">Cue</div>
+<i class="cte-divider" style="left:1250px;top:1318px;width:506px"></i>
+<div class="cte-text " style="left:126px;top:1331px;width:469px;font-size:20px">每一节stage的大段文字会被拆分成多个block层级，<b>每个 Block 负责一段相对完整的情境或节奏</b>，通常地点切换、任务穿插等可作为拆分block的依据。</div>
+<div class="cte-text " style="left:657px;top:1331px;width:521px;font-size:20px">台词／旁白／内心独白都算作dialogue层级，dialogue需要区分以上几种文本形式，以匹配不同的画面显示方式。dialogue承载内容较多，主要有以下内容：</div>
+<div class="cte-text " style="left:1250px;top:1331px;width:492px;font-size:20px">Cue是夹在台词文本中的特殊行，不作为普通对白播放，非台词、旁白之类的非正式文本被归类为Cue。Cue主要作为提示文字或用于配置正文中穿插的特殊内容。</div>
+<div class="cte-text " style="left:1250px;top:1438px;width:492px;font-size:20px">Cue的具体用途用三种：<ol><li><b>提示文字</b>：记录策划提醒或段落说明，帮助配置和检查剧情，不显示给玩家。</li><li>当剧情需要暂时交还玩家操作，例如前往另一处场景或与角色互动，就在对应 Cue 行关联任务。任务可配置类型、触发对象或区域、目标 Block，以及画面中的任务提示；完成后再接续剧情。</li><li><b>转场</b>：当两句文本之间需要特殊过渡，可以在 Cue 行选择转场预设，让转场发生在指定位置。</li></ol></div>
+<span class="cte-asset cte-triangle" style="left:103px;top:1444px"><img src="./assets/Work/2-1/marker-small.svg" alt=""></span>
+<div class="cte-text cte-bold" style="left:126px;top:1439px;width:328px;font-size:23px">可修改内容</div>
+<span class="cte-asset cte-triangle" style="left:634px;top:1459px"><img src="./assets/Work/2-1/marker-small.svg" alt=""></span>
+<div class="cte-text cte-bold" style="left:657px;top:1454px;width:328px;font-size:23px">可修改内容</div>
+<span class="cte-asset cte-triangle" style="left:1230px;top:1736px"><img src="./assets/Work/2-1/cue-marker.svg" alt=""></span>
+<div class="cte-text cte-bold" style="left:1253px;top:1731px;width:328px;font-size:23px">可修改内容</div>
+<div class="cte-text cte-tag" style="left:126px;top:1480px;width:143px;font-size:23px">地点</div>
+<div class="cte-text cte-tag" style="left:290px;top:1480px;width:153.113px;font-size:23px">起始台词 ID</div>
+<div class="cte-text cte-tag" style="left:126px;top:1524px;width:142.805px;font-size:23px">block排序</div>
+<div class="cte-text cte-tag" style="left:290px;top:1524px;width:175px;font-size:23px">背景音乐 BGM</div>
+<div class="cte-text cte-tag" style="left:662px;top:1502px;width:143px;font-size:23px">文本</div>
+<div class="cte-text cte-tag" style="left:662px;top:1579px;width:143px;font-size:23px">场景</div>
+<div class="cte-text cte-tag" style="left:662px;top:1659px;width:143px;font-size:23px">立绘角色</div>
+<div class="cte-text cte-tag" style="left:662px;top:1720px;width:143px;font-size:23px">立绘位置</div>
+<div class="cte-text cte-tag" style="left:662px;top:1787px;width:143px;font-size:23px">画面内容</div>
+<span class="cte-asset " style="left:820px;top:1498px"><img src="./assets/Work/2-1/dialogue-branch.svg" alt=""></span>
+<span class="cte-asset " style="left:820px;top:1573px"><img src="./assets/Work/2-1/scene-branch.svg" alt=""></span>
+<span class="cte-asset " style="left:820px;top:1655px"><img src="./assets/Work/2-1/dialogue-branch.svg" alt=""></span>
+<span class="cte-asset " style="left:820px;top:1738px"><img src="./assets/Work/2-1/position-line.svg" alt=""></span>
+<span class="cte-asset " style="left:820px;top:1784px"><img src="./assets/Work/2-1/effects-branch.svg" alt=""></span>
+<span class="cte-asset cte-flip" style="left:1039px;top:1784px"><img src="./assets/Work/2-1/effects-bracket.svg" alt=""></span>
+<div class="cte-text " style="left:922px;top:1485px;width:257px;font-size:16px">文本类型（台词／旁白／内心独白）</div>
+<div class="cte-text " style="left:922px;top:1511px;width:245px;font-size:16px">旁白形式（黑屏旁白／普通旁白）</div>
+<div class="cte-text " style="left:921px;top:1536px;width:246px;font-size:16px">修改文本（显示文本／显示人名）</div>
+<div class="cte-text " style="left:930px;top:1562px;width:220px;font-size:16px">选择出镜骨骼角色</div>
+<div class="cte-text " style="left:930px;top:1608px;width:200px;font-size:16px">选择镜头id</div>
+<div class="cte-text cte-muted" style="left:662px;top:1619px;width:271px;font-size:16px">在 Block 地点下选择具体场景镜头</div>
+<div class="cte-text " style="left:926px;top:1643px;width:240px;font-size:16px">选择角色id</div>
+<div class="cte-text " style="left:926px;top:1666px;width:240px;font-size:16px">→选择可选立绘动作</div>
+<div class="cte-text " style="left:926px;top:1689px;width:240px;font-size:16px">→选择可选立绘表情</div>
+<div class="cte-text " style="left:928px;top:1726px;width:153px;font-size:16px">居左／居右</div>
+<div class="cte-text " style="left:929px;top:1767px;width:150px;font-size:16px">对话框</div>
+<div class="cte-text " style="left:929px;top:1795px;width:121px;font-size:16px">情绪气泡</div>
+<div class="cte-text " style="left:929px;top:1823px;width:71px;font-size:16px">震动</div>
+<div class="cte-text " style="left:929px;top:1847px;width:110px;font-size:16px">立绘特殊处理</div>
+<div class="cte-text cte-muted" style="left:664px;top:1832px;width:271px;font-size:16px">储存多类画面效果预设<br>以预设id的形式统一配置<br>（可多选）</div>
+<div class="cte-text " style="left:1062px;top:1798px;width:65px;font-size:16px">出现时机</div>
+<div class="cte-text " style="left:1062px;top:1820px;width:73px;font-size:16px">效果参数</div>
+<div class="cte-text cte-muted" style="left:1429px;top:1827px;width:271px;font-size:16px">通过task_id配置，由task模块承接</div>
+<div class="cte-text cte-muted" style="left:1429px;top:1914px;width:181px;font-size:16px">转场（选择转场预设）</div>
+<div class="cte-text cte-tag" style="left:1253px;top:1779px;width:163px;font-size:23px">选择Cue 类型</div>
+<div class="cte-text cte-tag" style="left:1296px;top:1822px;width:120px;font-size:23px">任务</div>
+<div class="cte-text cte-tag" style="left:1296px;top:1865px;width:120px;font-size:23px">提示文字</div>
+<div class="cte-text cte-tag" style="left:1296px;top:1907px;width:120px;font-size:23px">转场</div>
+<span class="cte-asset " style="left:1273px;top:1841px"><img src="./assets/Work/2-1/cue-branch.svg" alt=""></span></div></section>
+<section class="page export-page" id="table-export" data-anchor="表格导出工具" aria-labelledby="export-title"><div class="export-panel">
+<h2 id="export-title">{ B 表格导出工具 }</h2><p class="export-lead">按内容模块选表，将飞书配置转换并导入 UE，保留每次更新的结果</p>
+<ol class="export-flow"><li><b>01</b><strong>飞书源表</strong></li><li><b>02</b><strong>按模块选表</strong></li><li><b>03</b><strong>导出 JSON</strong><small>exportAll</small></li><li><b>04</b><strong>UE DataTable</strong><small>ArrReimportAllTables</small></li></ol>
+<h3>核心功能</h3><ol class="export-features"><li><b>01</b><strong>按模块选表</strong><p>剧情、地图交互、联系簿／图鉴与 UI 分区管理；可选择本次更新的表。</p></li><li><b>02</b><strong>查看数据去向</strong><p>展示飞书工作表链接和 UE DataTable 路径；已接入的表可预览内容。</p></li><li><b>03</b><strong>转换并导入</strong><p>将选中的飞书数据导出为 JSON，再刷新并保存对应的 UE DataTable。</p></li><li><b>04</b><strong>追踪更新结果</strong><p>按表查看最近导入时间、状态、更新说明和历次操作结果。</p></li></ol>
+<div class="export-records"><section><h3>更新记录</h3><p>每次导入按表生成记录，并关联同一批次：保留表格名称、北京时间、导入结果与更新说明。按模块或单表回看，核对哪次更新已进入游戏。</p><p class="export-trail">批次 → 时间 → 成功／待导入／失败 → 更新说明</p></section><section><h3>导入保护</h3><p>检测到 UE 编辑器仍在运行时，跳过资产重导入，仅保留已转换的 JSON 和待导入状态，避免编辑器内旧数据覆盖新数据。</p></section></div>
+<h3>当前模块</h3><ol class="export-modules"><li><b>01</b>剧情</li><li><b>02</b>地图交互</li><li><b>03</b>联系簿／图鉴</li><li><b>04</b>UI</li><li><b>05</b>美术素材导入</li></ol>
+</div></section>
+</main><script src="./src/js/work.js?v=swap-1"></script>
+</body></html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>窗台珠帘 · 演示</title>
+  <style>
+    :root { --red: #FF0A3C; --sky: #56CFF0; }
+    html, body { margin: 0; height: 100%; }
+    /* 背景沿用首页的天空图，和红蓝版同一套颜色 */
+    body {
+      display: grid; place-items: center; overflow: hidden;
+      background: url("./assets/home/sky.webp") center / cover no-repeat, var(--sky);
+    }
+    /* 场景：窗户 SVG 和字符画布叠在一起，坐标都是 340 × 700 的设计单位 */
+    .scene { position: relative; width: min(420px, 80vw, calc(92vh * 340 / 700)); aspect-ratio: 340 / 700; }
+    .scene svg, .scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .tip {
+      position: fixed; left: 24px; bottom: 24px; margin: 0; padding: 8px 12px;
+      background: #000; color: #fff; font: 13px/1 "JetBrains Mono", Consolas, monospace; letter-spacing: .1em;
+      pointer-events: none;
+    }
+    .tip b { color: var(--red); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <!-- 窗户：白色外框 + 红色拱形窗棂 + 浅色玻璃 + 白色窗台 -->
+    <svg viewBox="0 0 340 700" aria-hidden="true">
+      <defs>
+        <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffffff"/>
+          <stop offset="1" stop-color="#d9f3fc"/>
+        </linearGradient>
+      </defs>
+      <path d="M30 360 V160 A140 140 0 0 1 310 160 V360 Z" fill="#fff"/>
+      <path d="M52 350 V170 A118 118 0 0 1 288 170 V350 Z" fill="url(#glass)" stroke="#FF0A3C" stroke-width="11"/>
+      <path d="M170 52 V350 M52 160 H288 M52 255 H288" stroke="#FF0A3C" stroke-width="9" fill="none"/>
+      <path d="M100 300 L150 130" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".7"/>
+      <rect x="34" y="336" width="272" height="16" fill="#fff"/>
+    </svg>
+    <canvas data-curtain aria-label="窗台字符珠帘：用鼠标拨动垂下的字符"></canvas>
+  </div>
+  <p class="tip">划过 <b>拨开</b> · 按住 <b>揪起</b> · 松手 <b>回弹</b></p>
+
+  <script src="./src/js/text-curtain.js?v=7"></script>
+  <script>TextCurtain.mount(document.querySelector('[data-curtain]'));</script>
+</body>
+</html>
